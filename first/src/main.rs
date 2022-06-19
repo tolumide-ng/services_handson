@@ -1,36 +1,18 @@
-use std::{net::SocketAddr, sync::{Arc, Mutex}, fmt};
-use futures::{future, Future};
-use hyper::{server::Server, Response, Body, rt::{run}, Request, http::Error, Method, StatusCode};
+use futures::{Future};
+use std::{net::SocketAddr, sync::{Arc, Mutex}};
+use hyper::{server::Server, rt::{run}};
 use hyper::service::service_fn;
 use slab::Slab;
 
-type UserId = u64;
-struct UserData;
-type UserDb = Arc<Mutex<Slab<UserData>>>;
 
-const INDEX: &'static str = r#"
-<!doctype html>
-<html>
-    <head>
-        <title>Rust Microservice</title>
-    </head>
-    <body>
-        <h3>Rust Microservice
-    </body>
-</html>
-"#;
+use routes::microservice_handler;
 
-fn microservice_handler(req: Request<Body>, user_db: &UserDb) -> impl Future<Item = Response<Body>, Error=Error> {
-    match (req.method(), req.uri().path()) {
-        (&Method::GET, "/") => {
-            future::ok(Response::new(INDEX.into()))
-        },
-        _ => {
-            let response = Response::builder().status(StatusCode::NOT_FOUND).body(Body::empty()).unwrap();
-            future::ok(response)
-        }
-    }
-}
+mod response;
+mod routes;
+
+
+
+
 
 fn main() {
  let addr: SocketAddr = ([127, 0, 0, 1], 8080).into();
